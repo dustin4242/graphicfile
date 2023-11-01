@@ -3,8 +3,8 @@ fn main() {
 }
 
 fn color_cat() {
-    let cat = std::fs::read_to_string("./color_cat.txt").unwrap();
-    export_gf(_txt_to_graphicfile(&cat, 1, 2));
+    let cat = std::fs::read_to_string("./color_cat4.txt").unwrap();
+    export_gf(_txt_to_graphicfile(&cat, 2, 2));
 }
 
 fn nyan() {
