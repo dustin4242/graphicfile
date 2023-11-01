@@ -97,21 +97,25 @@ fn ppm_to_graphicfile(ppm: String) -> Option<Vec<u8>> {
         };
     }
     let mut color_information: Vec<u8> = Vec::new();
-    for x in 0..converted.len() / 2 {
-        color_information.push(
-            ((pallete
+    let mut color_index = 0;
+    let mut byte: u8 = 0;
+    for x in 0..converted.len() {
+        if converted.get(x).unwrap() != &(0, 0, 0) {
+            byte += (pallete
                 .iter()
                 .position(|p| p == converted.get(x).unwrap())
                 .unwrap() as u8)
-                << 4)
-                + pallete
-                    .iter()
-                    .position(|p| p == converted.get(x).unwrap())
-                    .unwrap() as u8,
-        );
+                << (color_index % 2) * 4;
+            color_index += 1;
+            if color_index % 2 == 0 {
+                color_information.push(byte);
+                byte = 0;
+            }
+        }
     }
-    gf.append(vec![width as u8].as_mut());
-    gf.append(vec![height as u8].as_mut());
+    print!("{color_information:?}");
+    gf.append(vec![width as u8 / 8].as_mut());
+    gf.append(vec![height as u8 / 16].as_mut());
     gf.append(bitpixels.as_mut());
     for x in pallete {
         gf.push(x.0);
@@ -119,6 +123,5 @@ fn ppm_to_graphicfile(ppm: String) -> Option<Vec<u8>> {
         gf.push(x.2);
     }
     gf.append(color_information.as_mut());
-    println!("{gf:?}");
     Some(gf)
 }
