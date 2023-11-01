@@ -3,8 +3,8 @@ fn main() {
 }
 
 fn color_cat() {
-    let cat = std::fs::read_to_string("./color_cat5.txt").unwrap();
-    export_gf(_txt_to_graphicfile(&cat, 3, 3));
+    let cat = std::fs::read_to_string("./color_cat.txt").unwrap();
+    export_gf(_txt_to_graphicfile(&cat, 1, 1));
 }
 
 fn nyan() {
@@ -35,11 +35,11 @@ fn _txt_to_graphicfile(string: &str, width: u8, height: u8) -> Vec<u8> {
     }
     // color section
     index = width as usize * 8 * height as usize * 16;
-    if no_whitespace.get(index..index + 8 * (1 + 4)).is_some() {
-        for x in 0..4 {
+    if no_whitespace.get(index..index + 8 * 8 * 3).is_some() {
+        for x in 0..8 * 3 {
             bytes.push(_get_byte(&no_whitespace, x, index));
         }
-        index = index + 8 * 4;
+        index = index + 8 * 8 * 3;
         while no_whitespace.get(index..index + 8).is_some() {
             bytes.push(_get_byte(&no_whitespace, 0, index));
             index += 8;
