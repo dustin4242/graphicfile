@@ -55,6 +55,7 @@ fn _get_byte(string: &String, offset: usize, index: usize) -> u8 {
 }
 
 fn ppm_to_graphicfile(ppm: String) -> Option<Vec<u8>> {
+    let mut gf = Vec::new();
     let mut info = ppm.split_whitespace();
     info.next();
     let width = info.next()?.parse::<usize>().unwrap();
@@ -64,14 +65,22 @@ fn ppm_to_graphicfile(ppm: String) -> Option<Vec<u8>> {
     println!("{division}");
     let mut image_data = info;
     let mut converted = Vec::new();
+    let mut bitpixels = Vec::new();
     for _y in 0..height {
-        for _x in 0..width {
-            let rgb = (
-                image_data.next()?.parse::<u8>().unwrap() / division,
-                image_data.next()?.parse::<u8>().unwrap() / division,
-                image_data.next()?.parse::<u8>().unwrap() / division,
-            );
-            converted.push(rgb);
+        for _x in 0..width / 8 {
+            let mut byte: u8 = 0;
+            for x in 0..8 {
+                let rgb = (
+                    image_data.next()?.parse::<u8>().unwrap() / division,
+                    image_data.next()?.parse::<u8>().unwrap() / division,
+                    image_data.next()?.parse::<u8>().unwrap() / division,
+                );
+                if (rgb.0 + rgb.1 + rgb.2) > 0 {
+                    byte += 0x80 >> x;
+                };
+                converted.push(rgb);
+            }
+            bitpixels.push(byte);
         }
     }
     let mut pallete: Vec<(u8, u8, u8)> = Vec::with_capacity(8);
@@ -84,6 +93,15 @@ fn ppm_to_graphicfile(ppm: String) -> Option<Vec<u8>> {
     for x in converted {
         color_information.push(pallete.iter().position(|p| p == &x).unwrap() as u8);
     }
-    println!("{color_information:?}");
-    Some(vec![])
+    gf.append(vec![width as u8].as_mut());
+    gf.append(vec![height as u8].as_mut());
+    gf.append(bitpixels.as_mut());
+    for x in pallete {
+        gf.push(x.0);
+        gf.push(x.1);
+        gf.push(x.2);
+    }
+    gf.append(color_information.as_mut());
+    println!("{gf:?}");
+    Some(gf)
 }
