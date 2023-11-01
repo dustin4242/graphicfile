@@ -1,4 +1,13 @@
 fn main() {
+    color_cat()
+}
+
+fn color_cat() {
+    let cat = std::fs::read_to_string("./color_cat.txt").unwrap();
+    export_gf(_txt_to_graphicfile(&cat, 1, 2));
+}
+
+fn nyan() {
     let ppm = std::fs::read_to_string("nyan.ppm").unwrap();
     let mut no_comment = ppm.split("\n").collect::<Vec<&str>>();
     if no_comment.get(1).unwrap().starts_with("#") {
@@ -20,8 +29,8 @@ fn _txt_to_graphicfile(string: &str, width: u8, height: u8) -> Vec<u8> {
     let mut index;
     for y in 0..(height * 16) as usize {
         for x in 0..width as usize {
-            let index = y * width as usize + x;
-            bytes.push(_get_byte(&no_whitespace, x, index * 8));
+            let index = y * width as usize * 8 + x * 8;
+            bytes.push(_get_byte(&no_whitespace, x, index));
         }
     }
     // color section
@@ -60,9 +69,7 @@ fn ppm_to_graphicfile(ppm: String) -> Option<Vec<u8>> {
     info.next();
     let width = info.next()?.parse::<usize>().unwrap();
     let height = info.next()?.parse::<usize>().unwrap();
-    println!("{width} {height}");
     let division: u8 = ((info.next()?.parse::<usize>().unwrap() + 1) / 64) as u8;
-    println!("{division}");
     let mut image_data = info;
     let mut converted = Vec::new();
     let mut bitpixels = Vec::new();
@@ -90,8 +97,18 @@ fn ppm_to_graphicfile(ppm: String) -> Option<Vec<u8>> {
         };
     }
     let mut color_information: Vec<u8> = Vec::new();
-    for x in converted {
-        color_information.push(pallete.iter().position(|p| p == &x).unwrap() as u8);
+    for x in 0..converted.len() / 2 {
+        color_information.push(
+            ((pallete
+                .iter()
+                .position(|p| p == converted.get(x).unwrap())
+                .unwrap() as u8)
+                << 4)
+                + pallete
+                    .iter()
+                    .position(|p| p == converted.get(x).unwrap())
+                    .unwrap() as u8,
+        );
     }
     gf.append(vec![width as u8].as_mut());
     gf.append(vec![height as u8].as_mut());
